@@ -21,6 +21,14 @@ This repo documents **why** (firmware + board measurements) and a **proposed har
 
 ---
 
+## Background / inspiration
+
+- **First stereo mod of the RM1** (video) – showed that the CD decoder carries separate L/R and that an analog stereo mod is possible: https://youtu.be/ZOglG8-ErYQ
+- **HiFi Review Hub – follow-up on the reviewer's unit**, stating it plays stereo: https://youtu.be/FmXR7wpTGJk
+  The stereo claim is the reviewer's own statement, not verified here; his unit is a different PCB revision – see [below](#the-reviewers-unit-is-a-different-pcb-revision).
+
+This repo started from those two videos: if the reviewer's unit was stereo and the decoder outputs stereo, why does the backer unit play mono?
+
 ## Signal path (as found)
 
 ```
