@@ -5,7 +5,7 @@ The unit outputs **identical L+R mono on both channels** of the 3.5 mm AUX jack 
 
 This repo documents **why** (firmware + board measurements) and a **proposed hardware mod** that brings real stereo to the AUX jack.
 
-> ⚠️ **Status: the mod is NOT yet built or tested.** One precondition – that the CD decoder actually outputs separate L/R – is still unmeasured (see [Open items](#open-items)). Do it at your own risk; it voids any warranty.
+> ⚠️ **Status: the mod is NOT yet built.** Its precondition is confirmed: the CD decoder outputs separate L/R on links 1/2 (see [Test results](#test-results)). Do it at your own risk; it voids any warranty.
 >
 
 ---
@@ -17,7 +17,7 @@ This repo documents **why** (firmware + board measurements) and a **proposed har
 | Can stereo be enabled by a firmware update? | **No.** L and R are summed on the PCB before the only audio input the Bluetooth chip reads. The second input pin (PB7) is not connected at all. | High (code + measurement) |
 | Can stereo over Bluetooth ever work on this board? | **No.** The BT chip (Jieli AC6966B-class) has a single ADC channel and reads one pin. | High |
 | Is the reviewer's stereo unit the same hardware? | **No.** Its PCB is marked @2025, backer units @2026, with a different output stage layout. | High |
-| Can AUX be made stereo? | **Probably yes**, with 2 capacitors + 2 resistors + 2 wires, *if* the decoder outputs separate L/R. BT keeps working (mono). | Medium (pending test) |
+| Can AUX be made stereo? | **Yes**, with 2 capacitors + 2 resistors + 2 wires. The decoder outputs clean separate L/R (measured). BT keeps working (mono). | High (mod not yet built) |
 
 ---
 
@@ -88,6 +88,23 @@ What this does and does not show:
 - The visible difference is in the **output** stage; the frame is too low-res to see whether the **input** summing network or the PB7 trace differ.
 - It is still possible the reviewer was mistaken about stereo. A recording of test-CD tracks 1 and 2 from that unit would settle it.
 
+## Test results
+
+Test CD, AC mV on the decoder-side pad (○) of each link vs. ground (100 µF minus), before any modification:
+
+| Track content | Link 1 | Link 2 |
+|---|---|---|
+| L only, 1 kHz | 0 | 349 mV |
+| R only, 1 kHz | 348 mV | 0 |
+| L only, 400 Hz | 0 | 352 mV |
+| R only, 400 Hz | 349 mV | 0 |
+| L+R, 400 Hz | signal | signal |
+| silence | noise / autorange | noise / autorange |
+
+- **Link 1 = R, link 2 = L.** The other channel reads 0 → crosstalk below meter resolution.
+- ~350 mV RMS at −6 dBFS ≈ 0.7 V RMS full scale → normal line level.
+- One unexplained reading: on the L400/R1k track links 1/2 read only >100 mV and links 3/4 read 72 mV (0 on all other tracks). Likely a measurement artifact; irrelevant to the mod.
+
 ## The mod (AUX stereo, BT stays mono)
 
 Take L/R straight from the decoder side of the two links and feed the jack, disconnecting the Jieli DAC outputs.
@@ -99,7 +116,7 @@ Take L/R straight from the decoder side of the two links and feed the jack, disc
 
 **Per channel:**
 ```
-link pad (decoder side) ──wire── [10 µF BP] ──┬── J1 (L)   /   J3 (R)
+link 2 (L) / link 1 (R), decoder side ──wire── [10 µF BP] ──┬── J1 (L) / J3 (R)
                                                │
                                           [100 kΩ]
                                                │
@@ -107,7 +124,7 @@ link pad (decoder side) ──wire── [10 µF BP] ──┬── J1 (L)   / 
 ```
 1. Disconnect battery. Remove the **two big MLCCs** under the 66B4 chip (cuts Jieli DAC from the jack).
 2. Solder a wire to the **decoder-side pad** of link 1 and link 2. Leave the links in place → summing network still feeds PB6 → **Bluetooth keeps working (mono)**.
-3. Each wire → series capacitor → J1 / J3.
+3. Link 2 wire → series capacitor → J1 (L); link 1 wire → series capacitor → J3 (R).
 4. 100 kΩ from J1 to J4 and from J3 to J4 (bleed resistors; the small parts next to the MLCCs are capacitors, not resistors).
 5. Verify with the test CD (AC mV on J1/J3 vs J4).
 
@@ -123,9 +140,9 @@ Measure AC mV vs. the 100 µF minus (ground):
 
 ## Open items
 
-- [ ] Decoder L/R separation on links 1/2 (test CD, AC mV) – **go/no-go for the mod**
-- [ ] Which link is L and which is R
-- [ ] Crosstalk with links left in place (depends on decoder output impedance)
+- [x] Decoder L/R separation on links 1/2 – **confirmed stereo**
+- [x] Which link is L and which is R – link 2 = L, link 1 = R
+- [ ] Crosstalk at the jack after the mod, with links left in place
 - [ ] Build + listening test
 - [ ] Whether the 2025 reviewer board also differs on the **input** side (no summing network / PB7 wired) – needs a clear photo of that area or a test-CD recording from that unit
 
